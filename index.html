@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12-Day Mini Cut Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --surface: #101010;
+  --card: #161616;
+  --card2: #1c1c1c;
+  --border: #242424;
+  --border2: #2e2e2e;
+  --accent: #e8ff47;
+  --accent-dim: rgba(232,255,71,0.12);
+  --green: #4ade80;
+  --green-dim: rgba(74,222,128,0.1);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.1);
+  --orange: #fb923c;
+  --orange-dim: rgba(251,146,60,0.1);
+  --purple: #c084fc;
+  --purple-dim: rgba(192,132,252,0.1);
+  --red: #f87171;
+  --text: #efefef;
+  --muted: #666;
+  --muted2: #888;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:32px 28px 24px;
+  position:relative;
+  overflow:hidden;
+}
+.header::after{
+  content:'MINI CUT';
+  font-family:'Bebas Neue',sans-serif;
+  font-size:120px;
+  color:rgba(232,255,71,0.03);
+  position:absolute;
+  right:-10px;top:-10px;
+  line-height:1;pointer-events:none;letter-spacing:4px;
+}
+.header-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);margin-bottom:8px;text-transform:uppercase}
+.header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,7vw,64px);letter-spacing:2px;line-height:.95}
+.header h1 span{color:var(--accent)}
+.header-dates{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-top:8px;letter-spacing:1px}
+
+/* ── PROGRESS BAR ── */
+.progress-strip{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:14px 28px;
+  display:flex;align-items:center;gap:16px;
+}
+.prog-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.prog-track{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.prog-pct{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);min-width:44px;text-align:right}
+
+/* ── STAT STRIP ── */
+.stat-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid var(--border);
+}
+.stat-box{
+  padding:16px 20px;
+  border-right:1px solid var(--border);
+  text-align:center;
+}
+.stat-box:last-child{border-right:none}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1}
+.stat-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:3px}
+.c-accent{color:var(--accent)}
+.c-green{color:var(--green)}
+.c-blue{color:var(--blue)}
+.c-orange{color:var(--orange)}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;border-bottom:1px solid var(--border);
+  background:var(--surface);overflow-x:auto;
+}
+.tab{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;padding:14px 20px;cursor:pointer;
+  color:var(--muted);border-bottom:2px solid transparent;
+  transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── MAIN ── */
+.main{padding:24px 28px;max-width:900px;margin:0 auto}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── SECTION HEADER ── */
+.sec-head{
+  display:flex;align-items:center;gap:12px;
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:3px;color:var(--accent);
+  text-transform:uppercase;margin-bottom:20px;
+}
+.sec-head::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── DAY CARDS ── */
+.days-list{display:flex;flex-direction:column;gap:10px}
+.day-row{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:2px;
+  overflow:hidden;
+  transition:border-color .2s;
+  cursor:pointer;
+}
+.day-row:hover{border-color:var(--border2)}
+.day-row.completed{border-left:3px solid var(--green)}
+.day-row.today-row{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-dim)}
+.day-row.locked{opacity:.45;cursor:default}
+
+.day-header{
+  display:grid;
+  grid-template-columns:64px 52px 1fr auto 100px;
+  align-items:center;gap:0;
+  padding:0;
+}
+.d-num{
+  padding:14px 12px;
+  text-align:center;
+  border-right:1px solid var(--border);
+}
+.d-num .big{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);line-height:1}
+.d-num .small{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-top:1px}
+.d-badge{
+  padding:12px 8px;
+  display:flex;align-items:center;justify-content:center;
+  border-right:1px solid var(--border);
+}
+.badge{
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  padding:4px 7px;border-radius:2px;text-transform:uppercase;
+  writing-mode:vertical-rl;transform:rotate(180deg);
+}
+.badge-s{background:var(--green-dim);color:var(--green)}
+.badge-c{background:var(--blue-dim);color:var(--blue)}
+.badge-h{background:var(--orange-dim);color:var(--orange)}
+.badge-r{background:var(--purple-dim);color:var(--purple)}
+.badge-p{background:var(--purple-dim);color:var(--purple)}
+.badge-rec{background:rgba(100,100,100,.1);color:var(--muted2)}
+
+.d-info{padding:14px 16px}
+.d-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.d-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);line-height:1.4}
+
+.d-kcal{
+  padding:14px 12px;
+  border-left:1px solid var(--border);
+  text-align:right;
+}
+.d-kcal .knum{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);line-height:1}
+.d-kcal .klbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted)}
+
+.d-check{
+  padding:14px 16px;
+  display:flex;align-items:center;justify-content:center;
+  border-left:1px solid var(--border);
+}
+.check-btn{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid var(--border2);
+  background:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;font-size:14px;
+}
+.check-btn:hover{border-color:var(--green)}
+.check-btn.done{background:var(--green);border-color:var(--green);color:#000}
+.check-btn.locked-btn{cursor:default;opacity:.3}
+
+/* ── EXPAND ── */
+.day-expand{
+  display:none;
+  border-top:1px solid var(--border);
+  background:var(--card2);
+  padding:20px;
+}
+.day-expand.open{display:block}
+.expand-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* ── NUTRITION LOG ── */
+.nut-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+.macro-inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.macro-inp{background:var(--card);border:1px solid var(--border);padding:10px;text-align:center}
+.macro-inp label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase}
+.macro-inp input{
+  width:100%;background:none;border:none;
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  text-align:center;color:var(--text);outline:none;
+}
+.macro-inp input:focus{color:var(--accent)}
+.macro-inp .target{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px}
+.macro-bar{height:3px;border-radius:2px;margin-top:4px;background:var(--border);overflow:hidden}
+.macro-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+
+/* ── WORKOUT LOG ── */
+.exercises{display:flex;flex-direction:column;gap:6px}
+.ex-row{
+  background:var(--card);border:1px solid var(--border);
+  padding:10px 12px;
+}
+.ex-row-header{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.ex-name-lbl{font-size:12px;color:var(--text);flex:1}
+.ex-sets-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.ex-sets-grid{display:flex;flex-wrap:wrap;gap:6px}
+.set-cell{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--surface);border:1px solid var(--border);
+  padding:6px 8px;border-radius:2px;min-width:64px;
+}
+.set-cell-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.set-cell-inputs{display:flex;align-items:center;gap:4px}
+.set-inp{
+  width:44px;background:transparent;border:none;border-bottom:1px solid var(--border2);
+  padding:2px 4px;font-family:'DM Mono',monospace;font-size:13px;
+  color:var(--text);text-align:center;outline:none;
+}
+.set-inp:focus{border-bottom-color:var(--accent);color:var(--accent)}
+.set-sep{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.set-inp-sub{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted2);text-align:center;margin-top:1px}
+
+/* ── NOTES ── */
+.notes-area{
+  width:100%;background:var(--card);border:1px solid var(--border);
+  padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;
+  font-size:11px;resize:vertical;min-height:64px;outline:none;
+  line-height:1.5;border-radius:2px;
+}
+.notes-area:focus{border-color:var(--accent)}
+.save-indicator{
+  font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);
+  margin-top:6px;letter-spacing:1px;
+  transition:color .3s;
+}
+.save-indicator.saved{color:var(--green)}
+
+/* ── WEIGHT PANEL ── */
+.weight-grid{display:flex;flex-direction:column;gap:10px}
+.weight-row{
+  display:grid;grid-template-columns:60px 1fr 120px auto;
+  align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--border);
+  padding:12px 16px;
+}
+.w-day{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent)}
+.w-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.w-inp-wrap{display:flex;align-items:center;gap:6px}
+.w-inp{
+  width:80px;background:var(--surface);border:1px solid var(--border);
+  padding:6px 10px;font-family:'Bebas Neue',sans-serif;font-size:22px;
+  color:var(--text);text-align:center;outline:none;border-radius:2px;
+}
+.w-inp:focus{border-color:var(--accent);color:var(--accent)}
+.w-unit{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.w-delta{font-family:'DM Mono',monospace;font-size:11px;text-align:right}
+.w-delta.pos{color:var(--red)}
+.w-delta.neg{color:var(--green)}
+
+/* ── CHART ── */
+.chart-wrap{
+  background:var(--card);border:1px solid var(--border);
+  padding:20px;margin-top:16px;
+}
+.chart-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
+.chart-svg-wrap{position:relative;height:140px}
+canvas#weightChart{width:100%;height:140px}
+
+/* ── NUTRITION OVERVIEW ── */
+.nut-overview{display:flex;flex-direction:column;gap:10px}
+.nut-day-row{
+  display:grid;grid-template-columns:56px 1fr 1fr 1fr 1fr 60px;
+  align-items:center;gap:8px;
+  background:var(--card);border:1px solid var(--border);
+  padding:10px 14px;
+}
+.nut-day-row .nd-label{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent)}
+.nut-mini-bar{display:flex;flex-direction:column;gap:2px}
+.nut-mini-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px}
+.nut-mini-val{font-size:12px;font-weight:500}
+.nut-mini-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:2px}
+.nut-mini-fill{height:100%;border-radius:2px}
+.nd-status{font-family:'DM Mono',monospace;font-size:9px;text-align:right}
+
+/* ── RULES ── */
+.rules-list{display:flex;flex-direction:column;gap:8px}
+.rule-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--border);
+  padding:12px 16px;
+}
+.rule-icon{font-size:18px;min-width:28px}
+.rule-text{font-size:12px;color:var(--muted2);line-height:1.5;flex:1}
+.rule-check{
+  width:22px;height:22px;border-radius:50%;
+  border:1.5px solid var(--border2);background:none;
+  cursor:pointer;flex-shrink:0;transition:all .2s;font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+}
+.rule-check.on{background:var(--green);border-color:var(--green);color:#000}
+
+/* ── UTIL ── */
+.mt8{margin-top:8px}
+.mt12{margin-top:12px}
+.mt16{margin-top:16px}
+.mono{font-family:'DM Mono',monospace}
+.txt-muted{color:var(--muted)}
+.flex-gap{display:flex;align-items:center;gap:8px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .main{padding:16px}
+  .stat-strip{grid-template-columns:repeat(2,1fr)}
+  .expand-grid{grid-template-columns:1fr}
+  .macro-inputs{grid-template-columns:repeat(2,1fr)}
+  .day-header{grid-template-columns:54px 42px 1fr 68px}
+  .d-check{display:none}
+  .weight-row{grid-template-columns:50px 1fr 100px}
+  .nut-day-row{grid-template-columns:46px 1fr 1fr 1fr 1fr}
+  .header::after{font-size:60px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">// Post-simulation · Apr 26 – May 7</div>
+  <h1>12-DAY<br><span>MINI CUT</span></h1>
+  <div class="header-dates" id="headerDates">Tracking in progress</div>
+</div>
+
+<div class="progress-strip">
+  <div class="prog-label">Progress</div>
+  <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-pct" id="progPct">0%</div>
+</div>
+
+<div class="stat-strip">
+  <div class="stat-box"><div class="stat-val c-accent" id="statDone">0/12</div><div class="stat-lbl">Days Done</div></div>
+  <div class="stat-box"><div class="stat-val c-green" id="statKg">—</div><div class="stat-lbl">Weight Change</div></div>
+  <div class="stat-box"><div class="stat-val c-blue" id="statProtein">0%</div><div class="stat-lbl">Protein Hit Rate</div></div>
+  <div class="stat-box"><div class="stat-val c-orange" id="statDeficit">0</div><div class="stat-lbl">Total Deficit kcal</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('schedule')">Schedule</button>
+  <button class="tab" onclick="switchTab('weight')">Weight</button>
+  <button class="tab" onclick="switchTab('nutrition')">Nutrition</button>
+  <button class="tab" onclick="switchTab('rules')">Rules</button>
+</div>
+
+<!-- ── SCHEDULE PANEL ── -->
+<div class="main">
+<div id="panel-schedule" class="panel active">
+  <div class="sec-head">Daily Log</div>
+  <div class="days-list" id="daysList"></div>
+</div>
+
+<!-- ── WEIGHT PANEL ── -->
+<div id="panel-weight" class="panel">
+  <div class="sec-head">Weight Log</div>
+  <div class="weight-grid" id="weightGrid"></div>
+  <div class="chart-wrap mt16">
+    <div class="chart-title">Weight Trend (kg)</div>
+    <canvas id="weightChart"></canvas>
+  </div>
+</div>
+
+<!-- ── NUTRITION PANEL ── -->
+<div id="panel-nutrition" class="panel">
+  <div class="sec-head">Nutrition Overview</div>
+  <div class="nut-overview" id="nutOverview"></div>
+</div>
+
+<!-- ── RULES PANEL ── -->
+<div id="panel-rules" class="panel">
+  <div class="sec-head">Daily Rules Checklist</div>
+  <div class="rules-list" id="rulesList"></div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA DEFINITIONS
+// ══════════════════════════════════════
+const DAYS = [
+  {
+    n:1, date:'Apr 26', type:'rec', label:'Recovery',
+    title:'Active Recovery — Post-Sim Flush',
+    sub:'30 min walk + 45 min Pilates · No intensity',
+    kcal:1750, protein:140, carbs:120, fat:65,
+    exercises:[
+      {name:'Walk',sets:'30 min',unit:'min'},
+      {name:'Pilates',sets:'45 min',unit:'min'},
+    ]
+  },
+  {
+    n:2, date:'Apr 27', type:'c', label:'Cardio',
+    title:'Zone 2 Run — 45 min',
+    sub:'HR <145bpm · Easy conversational pace',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Zone 2 Run',sets:'45 min',unit:'min'},
+      {name:'Dynamic Warm-up',sets:'10 min',unit:'min'},
+    ]
+  },
+  {
+    n:3, date:'Apr 28', type:'s', label:'Strength',
+    title:'Lower — Squat Focus',
+    sub:'Back squat · Leg press · Lunges · Curls',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Back Squat',sets:'3×5',unit:'kg'},
+      {name:'Leg Press',sets:'3×12',unit:'kg'},
+      {name:'Walking Lunges',sets:'3×12/leg',unit:'kg'},
+      {name:'Leg Curl',sets:'3×12',unit:'kg'},
+      {name:'Calf Raises',sets:'3×15',unit:'kg'},
+      {name:'Plank',sets:'3×45s',unit:'s'},
+    ]
+  },
+  {
+    n:4, date:'Apr 29', type:'s', label:'Strength',
+    title:'Upper — Push',
+    sub:'Bench · Incline DB · OHP · Laterals · Triceps',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Bench Press',sets:'3×5',unit:'kg'},
+      {name:'Incline DB Press',sets:'3×10',unit:'kg'},
+      {name:'Seated OHP',sets:'3×8',unit:'kg'},
+      {name:'Lateral Raises',sets:'4×15',unit:'kg'},
+      {name:'Cable Tricep Pushdown',sets:'3×12',unit:'kg'},
+      {name:'Overhead Tricep Ext.',sets:'3×12',unit:'kg'},
+    ]
+  },
+  {
+    n:5, date:'Apr 30', type:'h', label:'HYROX',
+    title:'HYROX Stations — 3 Rounds',
+    sub:'Ski erg · Sled push · Wall balls · Burpees',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Ski Erg',sets:'250m',unit:'s'},
+      {name:'Sled Push',sets:'25m',unit:'kg'},
+      {name:'Burpee Broad Jumps',sets:'10 reps',unit:'reps'},
+      {name:'Wall Balls',sets:'20 reps',unit:'kg'},
+      {name:'Sandbag Lunges',sets:'25m',unit:'kg'},
+    ]
+  },
+  {
+    n:6, date:'May 1', type:'s', label:'Strength',
+    title:'Lower — Hinge Focus',
+    sub:'Deadlifts · Hip thrusts · Bulgarian · Nordics',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Deadlift',sets:'3×4',unit:'kg'},
+      {name:'Hip Thrusts',sets:'4×10',unit:'kg'},
+      {name:'Bulgarian Split Squat',sets:'3×8/leg',unit:'kg'},
+      {name:'Nordic Curl',sets:'3×6',unit:''},
+      {name:'Cable Pull-Through',sets:'3×15',unit:'kg'},
+      {name:'Adductor Machine',sets:'3×15',unit:'kg'},
+    ]
+  },
+  {
+    n:7, date:'May 2', type:'r', label:'Rest',
+    title:'Full Rest Day',
+    sub:'Walk only 20–30 min · Lowest calorie day',
+    kcal:1750, protein:140, carbs:120, fat:65,
+    exercises:[
+      {name:'Walk',sets:'20–30 min',unit:'min'},
+    ]
+  },
+  {
+    n:8, date:'May 3', type:'s', label:'Strength',
+    title:'Upper — Pull',
+    sub:'Pull-ups · Rows · Face pulls · Rear delts · Curls',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Pull-Ups / Lat Pulldown',sets:'4×6–8',unit:'kg'},
+      {name:'Barbell Row',sets:'3×8',unit:'kg'},
+      {name:'Seated Cable Row',sets:'3×12',unit:'kg'},
+      {name:'Face Pulls',sets:'4×15',unit:'kg'},
+      {name:'Rear Delt Flyes',sets:'3×15',unit:'kg'},
+      {name:'Hammer Curls',sets:'3×12',unit:'kg'},
+    ]
+  },
+  {
+    n:9, date:'May 4', type:'c', label:'Cardio',
+    title:'Tempo Intervals — 5×4 min',
+    sub:'Threshold effort · 90s rest between reps',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Warm-up jog',sets:'10 min',unit:'min'},
+      {name:'Tempo interval',sets:'5×4 min',unit:'min'},
+      {name:'Rest between reps',sets:'90s',unit:'s'},
+      {name:'Cool-down',sets:'5 min',unit:'min'},
+    ]
+  },
+  {
+    n:10, date:'May 5', type:'s', label:'Strength',
+    title:'Full Body — Compound Focus',
+    sub:'Squat · Deadlift · Pull-up · Press · Carry',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Back Squat',sets:'3×5',unit:'kg'},
+      {name:'Deadlift',sets:'3×4',unit:'kg'},
+      {name:'Weighted Pull-Up',sets:'3×5',unit:'kg'},
+      {name:'DB Bench Press',sets:'3×8',unit:'kg'},
+      {name:'Farmers Carry',sets:'4×30m',unit:'kg'},
+      {name:'Ab Wheel Rollout',sets:'3×10',unit:''},
+    ]
+  },
+  {
+    n:11, date:'May 6', type:'p', label:'Pilates',
+    title:'Pilates + 20 min Walk',
+    sub:'Core depth · Posture reset · Active recovery',
+    kcal:1750, protein:140, carbs:120, fat:65,
+    exercises:[
+      {name:'Walk',sets:'20 min',unit:'min'},
+      {name:'Pilates session',sets:'45 min',unit:'min'},
+    ]
+  },
+  {
+    n:12, date:'May 7', type:'h', label:'HYROX',
+    title:'HYROX Stations — 2 Rounds, Moderate',
+    sub:'Rowing · Farmers carry · Sled pull · Lunges',
+    kcal:1950, protein:140, carbs:175, fat:60,
+    exercises:[
+      {name:'Rowing',sets:'500m',unit:'s'},
+      {name:'Farmers Carry',sets:'2×30m',unit:'kg'},
+      {name:'Sled Pull',sets:'2×25m',unit:'kg'},
+      {name:'Sandbag Lunges',sets:'2×25m',unit:'kg'},
+      {name:'Wall Balls',sets:'2×20 reps',unit:'kg'},
+    ]
+  },
+];
+
+const RULES = [
+  {icon:'🏋️', text:'Keep loads on the bar — drop sets, not weight'},
+  {icon:'💧', text:'3L+ water today'},
+  {icon:'🥩', text:'Hit 140g protein — logged and verified'},
+  {icon:'🕐', text:'Front-loaded carbs around training'},
+  {icon:'🧂', text:'No sodium restriction — kept consistent'},
+  {icon:'😴', text:'7.5–8h sleep last night'},
+  {icon:'🚫', text:'No alcohol today'},
+  {icon:'📊', text:'Weighed in this morning'},
+];
+
+const BADGE_CLASS = {s:'badge-s',c:'badge-c',h:'badge-h',r:'badge-r',p:'badge-p',rec:'badge-rec'};
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem('miniCutState')||'{}') }
+  catch(e){ return {} }
+}
+function saveState(state){
+  localStorage.setItem('miniCutState', JSON.stringify(state));
+}
+
+let S = loadState();
+if(!S.days) S.days = {};      // {1:{completed,notes,kcal,protein,carbs,fat,exercises:{name:load}}}
+if(!S.weights) S.weights = {}; // {1:kg}
+if(!S.rules) S.rules = {};    // {1:[true,false,...]}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function persist(indicator){
+  saveState(S);
+  updateStats();
+  if(indicator){
+    indicator.textContent='✓ SAVED';
+    indicator.classList.add('saved');
+    setTimeout(()=>{indicator.textContent='Auto-saved';indicator.classList.remove('saved')},1500);
+  }
+}
+
+function dayData(n){ if(!S.days[n]) S.days[n]={}; return S.days[n]; }
+
+function proteinHitRate(){
+  let hit=0,logged=0;
+  DAYS.forEach(d=>{
+    const dd=S.days[d.n];
+    if(dd && dd.protein!==undefined && dd.protein!==''){
+      logged++;
+      if(parseFloat(dd.protein)>=140) hit++;
+    }
+  });
+  return logged===0?0:Math.round(hit/logged*100);
+}
+
+function totalDeficit(){
+  let def=0;
+  DAYS.forEach(d=>{
+    const dd=S.days[d.n];
+    if(dd && dd.completed){
+      const kcalLogged = parseFloat(dd.kcal)||d.kcal;
+      def += (2300 - kcalLogged);
+    }
+  });
+  return Math.round(def);
+}
+
+function weightChange(){
+  const entries = DAYS.map(d=>S.weights[d.n]).filter(v=>v!==undefined&&v!=='');
+  if(entries.length<2) return null;
+  return (entries[entries.length-1]-entries[0]).toFixed(1);
+}
+
+function updateStats(){
+  const done = DAYS.filter(d=>S.days[d.n]&&S.days[d.n].completed).length;
+  document.getElementById('statDone').textContent=`${done}/12`;
+  document.getElementById('progFill').style.width=`${Math.round(done/12*100)}%`;
+  document.getElementById('progPct').textContent=`${Math.round(done/12*100)}%`;
+  document.getElementById('statProtein').textContent=`${proteinHitRate()}%`;
+  const def=totalDeficit();
+  document.getElementById('statDeficit').textContent=def>0?`+${def.toLocaleString()}`:def.toLocaleString();
+  const wc=weightChange();
+  const el=document.getElementById('statKg');
+  if(wc===null){el.textContent='—';}
+  else{
+    const v=parseFloat(wc);
+    el.textContent=(v<=0?'':'+')+ wc+'kg';
+    el.style.color=v<=0?'var(--green)':'var(--red)';
+  }
+  // update header dates
+  document.getElementById('headerDates').textContent=`Apr 26 – May 7, 2025 · ${done} of 12 days complete`;
+}
+
+// ══════════════════════════════════════
+// SCHEDULE BUILD
+// ══════════════════════════════════════
+function buildSchedule(){
+  const list=document.getElementById('daysList');
+  list.innerHTML='';
+  DAYS.forEach(d=>{
+    const dd=S.days[d.n]||{};
+    const isCompleted=!!dd.completed;
+
+    const row=document.createElement('div');
+    row.className='day-row'+(isCompleted?' completed':'');
+    row.id=`day-row-${d.n}`;
+
+    // header
+    const hdr=document.createElement('div');
+    hdr.className='day-header';
+    hdr.innerHTML=`
+      <div class="d-num"><div class="big">${String(d.n).padStart(2,'0')}</div><div class="small">${d.date}</div></div>
+      <div class="d-badge"><div class="badge ${BADGE_CLASS[d.type]}">${d.label}</div></div>
+      <div class="d-info"><div class="d-title">${d.title}</div><div class="d-sub">${d.sub}</div></div>
+      <div class="d-kcal"><div class="knum">${d.kcal}</div><div class="klbl">kcal target</div></div>
+      <div class="d-check"><button class="check-btn ${isCompleted?'done':''}" id="chk-${d.n}" title="Mark complete">✓</button></div>
+    `;
+    hdr.addEventListener('click',(e)=>{
+      if(e.target.classList.contains('check-btn')) return;
+      toggleExpand(d.n);
+    });
+    hdr.querySelector('.check-btn').addEventListener('click',(e)=>{
+      e.stopPropagation();
+      toggleComplete(d.n, row);
+    });
+
+    // expand
+    const exp=document.createElement('div');
+    exp.className='day-expand';
+    exp.id=`expand-${d.n}`;
+    exp.innerHTML=buildExpand(d,dd);
+
+    row.appendChild(hdr);
+    row.appendChild(exp);
+    list.appendChild(row);
+
+    // wire inputs after render
+    wireInputs(d, exp);
+  });
+}
+
+function buildExpand(d, dd){
+  // nutrition
+  const nutTargets={kcal:d.kcal,protein:d.protein,carbs:d.carbs,fat:d.fat};
+  const macros=['kcal','protein','carbs','fat'];
+  const colors={kcal:'var(--accent)',protein:'var(--green)',carbs:'var(--blue)',fat:'var(--orange)'};
+  const nutHTML=macros.map(m=>{
+    const val=dd[m]!==undefined&&dd[m]!==''?dd[m]:'';
+    const pct=val?Math.min(100,Math.round(parseFloat(val)/nutTargets[m]*100)):0;
+    return `<div class="macro-inp">
+      <label>${m}</label>
+      <input type="number" class="nut-inp" data-macro="${m}" data-day="${d.n}" value="${val}" placeholder="0">
+      <div class="target">/ ${nutTargets[m]}${m==='kcal'?'':'g'}</div>
+      <div class="macro-bar"><div class="macro-bar-fill" id="bar-${d.n}-${m}" style="width:${pct}%;background:${colors[m]}"></div></div>
+    </div>`;
+  }).join('');
+
+  // exercises — parse set count from sets string e.g. "3×5" → 3, "4×15" → 4, "30 min" → 1
+  function parseSetCount(setsStr){
+    const m=setsStr.match(/^(\d+)[×x]/);
+    return m?parseInt(m[1]):1;
+  }
+  const exHTML=d.exercises.map((ex,i)=>{
+    const numSets=parseSetCount(ex.sets);
+    const savedEx=(dd.exercises&&dd.exercises[i])?dd.exercises[i]:{};
+    // savedEx = {sets:[{load:'',reps:''},...]}
+    const setsData=savedEx.sets||Array.from({length:numSets},()=>({load:'',reps:''}));
+    const unit=ex.unit||'kg';
+    const isTime=['min','s'].includes(unit);
+    const setCells=Array.from({length:numSets},(_,s)=>{
+      const sv=setsData[s]||{};
+      if(isTime){
+        return `<div class="set-cell">
+          <div class="set-cell-label">Set ${s+1}</div>
+          <div class="set-cell-inputs">
+            <input type="text" class="set-inp set-load-inp" data-day="${d.n}" data-exidx="${i}" data-setidx="${s}" data-field="load" value="${sv.load||''}" placeholder="—">
+          </div>
+          <div class="set-inp-sub">${unit}</div>
+        </div>`;
+      }
+      return `<div class="set-cell">
+        <div class="set-cell-label">Set ${s+1}</div>
+        <div class="set-cell-inputs">
+          <input type="text" class="set-inp set-load-inp" data-day="${d.n}" data-exidx="${i}" data-setidx="${s}" data-field="load" value="${sv.load||''}" placeholder="kg">
+          <span class="set-sep">×</span>
+          <input type="text" class="set-inp set-load-inp" data-day="${d.n}" data-exidx="${i}" data-setidx="${s}" data-field="reps" value="${sv.reps||''}" placeholder="reps">
+        </div>
+        <div class="set-inp-sub">kg × reps</div>
+      </div>`;
+    }).join('');
+    return `<div class="ex-row">
+      <div class="ex-row-header">
+        <div class="ex-name-lbl">${ex.name}</div>
+        <div class="ex-sets-lbl">${ex.sets}</div>
+      </div>
+      <div class="ex-sets-grid">${setCells}</div>
+    </div>`;
+  }).join('');
+
+  const notes=dd.notes||'';
+  return `
+    <div class="expand-grid">
+      <div>
+        <div class="nut-title">Nutrition Logged</div>
+        <div class="macro-inputs">${nutHTML}</div>
+        <div class="save-indicator" id="save-ind-${d.n}">Auto-saved</div>
+      </div>
+      <div>
+        <div class="nut-title">Workout Log</div>
+        <div class="exercises">${exHTML}</div>
+      </div>
+    </div>
+    <div class="mt12">
+      <div class="nut-title mt8">Notes</div>
+      <textarea class="notes-area" data-day="${d.n}" placeholder="How did it go? Energy, sleep, feel…">${notes}</textarea>
+    </div>
+  `;
+}
+
+function wireInputs(d, exp){
+  const ind=exp.querySelector(`#save-ind-${d.n}`);
+
+  // nutrition inputs
+  exp.querySelectorAll('.nut-inp').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const m=inp.dataset.macro;
+      const n=parseInt(inp.dataset.day);
+      const dd=dayData(n);
+      dd[m]=inp.value;
+      // update bar
+      const bar=exp.querySelector(`#bar-${n}-${m}`);
+      if(bar){
+        const target=DAYS[n-1][m];
+        const pct=inp.value?Math.min(100,Math.round(parseFloat(inp.value)/target*100)):0;
+        bar.style.width=pct+'%';
+      }
+      persist(ind);
+    });
+  });
+
+  // exercise set inputs
+  exp.querySelectorAll('.set-load-inp').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const n=parseInt(inp.dataset.day);
+      const ei=parseInt(inp.dataset.exidx);
+      const si=parseInt(inp.dataset.setidx);
+      const field=inp.dataset.field;
+      const dd=dayData(n);
+      if(!dd.exercises) dd.exercises={};
+      if(!dd.exercises[ei]) dd.exercises[ei]={sets:[]};
+      if(!dd.exercises[ei].sets) dd.exercises[ei].sets=[];
+      while(dd.exercises[ei].sets.length<=si) dd.exercises[ei].sets.push({load:'',reps:''});
+      dd.exercises[ei].sets[si][field]=inp.value;
+      persist(ind);
+    });
+  });
+
+  // notes
+  const ta=exp.querySelector('.notes-area');
+  if(ta){
+    ta.addEventListener('input',()=>{
+      const n=parseInt(ta.dataset.day);
+      const dd=dayData(n);
+      dd.notes=ta.value;
+      persist(ind);
+    });
+  }
+}
+
+function toggleExpand(n){
+  const exp=document.getElementById(`expand-${n}`);
+  exp.classList.toggle('open');
+}
+
+function toggleComplete(n, row){
+  const dd=dayData(n);
+  dd.completed=!dd.completed;
+  row.classList.toggle('completed', dd.completed);
+  const btn=document.getElementById(`chk-${n}`);
+  btn.classList.toggle('done', dd.completed);
+  persist();
+}
+
+// ══════════════════════════════════════
+// WEIGHT PANEL
+// ══════════════════════════════════════
+function buildWeight(){
+  const grid=document.getElementById('weightGrid');
+  grid.innerHTML='';
+  DAYS.forEach((d,i)=>{
+    const val=S.weights[d.n]!==undefined?S.weights[d.n]:'';
+    const prev=i>0?S.weights[DAYS[i-1].n]:undefined;
+    let delta='';
+    let deltaClass='';
+    if(val!==''&&prev!==undefined&&prev!==''){
+      const diff=(parseFloat(val)-parseFloat(prev)).toFixed(1);
+      delta=(diff>0?'+':'')+diff+'kg';
+      deltaClass=diff>0?'pos':'neg';
+    }
+
+    const row=document.createElement('div');
+    row.className='weight-row';
+    row.innerHTML=`
+      <div><div class="w-day">${String(d.n).padStart(2,'0')}</div></div>
+      <div><div class="w-date mono txt-muted">${d.date}</div></div>
+      <div class="w-inp-wrap">
+        <input type="number" step="0.1" class="w-inp" data-day="${d.n}" value="${val}" placeholder="—">
+        <span class="w-unit">kg</span>
+      </div>
+      <div class="w-delta ${deltaClass}" id="wdelta-${d.n}">${delta}</div>
+    `;
+    grid.appendChild(row);
+
+    row.querySelector('.w-inp').addEventListener('input',(e)=>{
+      S.weights[d.n]=e.target.value;
+      persist();
+      buildWeight(); // re-render deltas
+      drawChart();
+    });
+  });
+  drawChart();
+}
+
+function drawChart(){
+  const canvas=document.getElementById('weightChart');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  canvas.width=rect.width*dpr;
+  canvas.height=140*dpr;
+  ctx.scale(dpr,dpr);
+  const W=rect.width, H=140;
+  ctx.clearRect(0,0,W,H);
+
+  const pts=DAYS.map((d,i)=>({x:i,y:parseFloat(S.weights[d.n])||null})).filter(p=>p.y!==null);
+  if(pts.length<1) return;
+
+  const vals=pts.map(p=>p.y);
+  const minV=Math.min(...vals)-0.5;
+  const maxV=Math.max(...vals)+0.5;
+  const pad={l:30,r:16,t:10,b:24};
+  const scaleX=(i)=>pad.l+(i/(11))*(W-pad.l-pad.r);
+  const scaleY=(v)=>pad.t+(maxV-v)/(maxV-minV)*(H-pad.t-pad.b);
+
+  // grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.05)';
+  ctx.lineWidth=1;
+  for(let i=0;i<4;i++){
+    const y=pad.t+i*(H-pad.t-pad.b)/3;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+  }
+
+  // line
+  if(pts.length>1){
+    ctx.beginPath();
+    ctx.strokeStyle='rgba(232,255,71,0.6)';
+    ctx.lineWidth=1.5;
+    pts.forEach((p,i)=>{
+      const x=scaleX(p.x), y=scaleY(p.y);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+
+  // dots + labels
+  pts.forEach(p=>{
+    const x=scaleX(p.x), y=scaleY(p.y);
+    ctx.beginPath();
+    ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle='#e8ff47';ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.font=`9px 'DM Mono', monospace`;
+    ctx.textAlign='center';
+    ctx.fillText(p.y.toFixed(1),x,y-8);
+  });
+
+  // x labels
+  ctx.fillStyle='rgba(255,255,255,0.25)';
+  ctx.font=`8px 'DM Mono', monospace`;
+  [0,2,4,6,8,10,11].forEach(i=>{
+    const x=scaleX(i);
+    ctx.fillText(DAYS[i].date,x,H-6);
+  });
+}
+
+// ══════════════════════════════════════
+// NUTRITION OVERVIEW
+// ══════════════════════════════════════
+function buildNutOverview(){
+  const wrap=document.getElementById('nutOverview');
+  wrap.innerHTML='';
+  const macros=['protein','carbs','fat','kcal'];
+  const colors={protein:'var(--green)',carbs:'var(--blue)',fat:'var(--orange)',kcal:'var(--accent)'};
+
+  DAYS.forEach(d=>{
+    const dd=S.days[d.n]||{};
+    const logged=macros.some(m=>dd[m]!==undefined&&dd[m]!=='');
+    const row=document.createElement('div');
+    row.className='nut-day-row';
+
+    const macroCols=macros.map(m=>{
+      const val=dd[m]!==undefined&&dd[m]!==''?parseFloat(dd[m]):null;
+      const target=d[m];
+      const pct=val!==null?Math.min(100,Math.round(val/target*100)):0;
+      const display=val!==null?val:'—';
+      return `<div class="nut-mini-bar">
+        <div class="nut-mini-label">${m}</div>
+        <div class="nut-mini-val" style="color:${colors[m]}">${display}${val!==null&&m!=='kcal'?'g':val!==null?' kcal':''}</div>
+        <div class="nut-mini-track"><div class="nut-mini-fill" style="width:${pct}%;background:${colors[m]}"></div></div>
+      </div>`;
+    }).join('');
+
+    const status=!logged?`<span style="color:var(--muted);font-size:9px">not logged</span>`
+      :(dd.completed?`<span style="color:var(--green);font-size:9px">✓ done</span>`:`<span style="color:var(--accent);font-size:9px">in progress</span>`);
+
+    row.innerHTML=`
+      <div><div class="nd-label">${String(d.n).padStart(2,'0')}</div><div class="mono txt-muted" style="font-size:9px">${d.date}</div></div>
+      ${macroCols}
+      <div class="nd-status">${status}</div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════
+// RULES PANEL
+// ══════════════════════════════════════
+function buildRules(){
+  const list=document.getElementById('rulesList');
+  list.innerHTML='';
+  // Use today's day number for the rules (default day 1 if none done)
+  const todayN=getTodayN();
+  if(!S.rules[todayN]) S.rules[todayN]=RULES.map(()=>false);
+
+  RULES.forEach((r,i)=>{
+    const on=S.rules[todayN][i];
+    const item=document.createElement('div');
+    item.className='rule-item';
+    item.innerHTML=`
+      <div class="rule-icon">${r.icon}</div>
+      <div class="rule-text">${r.text}</div>
+      <button class="rule-check ${on?'on':''}" data-idx="${i}">${on?'✓':''}</button>
+    `;
+    item.querySelector('.rule-check').addEventListener('click',function(){
+      S.rules[todayN][i]=!S.rules[todayN][i];
+      this.classList.toggle('on',S.rules[todayN][i]);
+      this.textContent=S.rules[todayN][i]?'✓':'';
+      persist();
+    });
+    list.appendChild(item);
+  });
+
+  // label
+  const lbl=document.createElement('div');
+  lbl.style.cssText='font-family:DM Mono,monospace;font-size:10px;color:var(--muted);margin-top:12px;letter-spacing:1px;text-align:center';
+  lbl.textContent=`Checking off rules for Day ${todayN} (${DAYS[todayN-1].date})`;
+  list.appendChild(lbl);
+}
+
+function getTodayN(){
+  // Return the first incomplete day, or last day
+  for(let i=0;i<DAYS.length;i++){
+    const dd=S.days[DAYS[i].n];
+    if(!dd||!dd.completed) return DAYS[i].n;
+  }
+  return 12;
+}
+
+// ══════════════════════════════════════
+// TABS
+// ══════════════════════════════════════
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if(name==='weight'){buildWeight();}
+  if(name==='nutrition'){buildNutOverview();}
+  if(name==='rules'){buildRules();}
+  if(name==='schedule'){
+    // re-render to reflect any changes
+    buildSchedule();
+  }
+}
+
+// ══════════════════════════════════════
+// RESIZE CHART
+// ══════════════════════════════════════
+window.addEventListener('resize',()=>{ if(!document.getElementById('panel-weight').classList.contains('active')) return; drawChart(); });
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+buildSchedule();
+updateStats();
+
+// auto-open today's day
+const todayN=getTodayN();
+setTimeout(()=>{
+  const exp=document.getElementById(`expand-${todayN}`);
+  if(exp) exp.classList.add('open');
+},200);
+</script>
+</body>
+</html>
