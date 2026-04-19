@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>12-Day Reset Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#080808">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reset">
 <style>
 :root {
   --bg: #080808;--surface: #101010;--card: #161616;--card2: #1c1c1c;
@@ -255,33 +260,33 @@ const DAYS = [
   // ── PHASE 1: FLUSH ── Maintenance. Repair. Zero training stress.
   {n:1,date:'Apr 26',phase:'flush',type:'deload',label:'Deload',
    title:'Full Rest — Sim Recovery',sub:'Walk 20 min · Sleep priority · No structured training',
-   phaseNote:'FLUSH — Calories at maintenance. Your body is repairing sim damage. No training stress.',
-   kcal:2300,protein:140,carbs:220,fat:80,
+   phaseNote:'FLUSH — Full maintenance. Your body is repairing sim damage. Eat enough to actually recover.',
+   kcal:2400,protein:140,carbs:220,fat:80,
    exercises:[{name:'Easy walk',sets:'1×20 min',unit:'min'}]},
 
   {n:2,date:'Apr 27',phase:'flush',type:'deload',label:'Deload',
    title:'Full Rest — Passive Recovery',sub:'Walk 20–30 min · Pilates optional · Prioritise sleep',
    phaseNote:'FLUSH — High water, anti-inflammatory foods. Pilates only if you feel like it — no pressure.',
-   kcal:2300,protein:140,carbs:220,fat:80,
+   kcal:2400,protein:140,carbs:220,fat:80,
    exercises:[{name:'Easy walk',sets:'1×30 min',unit:'min'},{name:'Pilates (optional)',sets:'1×30 min',unit:'min'}]},
 
   {n:3,date:'Apr 28',phase:'flush',type:'p',label:'Pilates',
    title:'Pilates + Light Walk',sub:'45 min Pilates · 30 min walk · HR stays low',
    phaseNote:'FLUSH — First structured movement. Gentle only. Focus on breathing and core reconnection.',
-   kcal:2300,protein:140,carbs:220,fat:80,
+   kcal:2400,protein:140,carbs:220,fat:80,
    exercises:[{name:'Walk',sets:'1×30 min',unit:'min'},{name:'Pilates',sets:'1×45 min',unit:'min'}]},
 
   {n:4,date:'Apr 29',phase:'flush',type:'c',label:'Cardio',
    title:'Zone 2 Run — Easy 30 min',sub:'HR <140bpm · Conversational pace · No pressure',
    phaseNote:'FLUSH — First run back. Easy only. Legs may feel heavy and flat — completely normal post-sim.',
-   kcal:2300,protein:140,carbs:225,fat:80,
+   kcal:2400,protein:140,carbs:220,fat:80,
    exercises:[{name:'Dynamic warm-up',sets:'1×10 min',unit:'min'},{name:'Zone 2 Run',sets:'1×30 min',unit:'min'},{name:'Cool-down',sets:'1×5 min',unit:'min'}]},
 
   // ── PHASE 2: REBUILD ── Light → normal training. Mild deficit rest days only.
   {n:5,date:'Apr 30',phase:'recomp',type:'s',label:'Strength',
    title:'Light Lower — Squat Focus (60–70%)',sub:'Higher reps · No failure · Blood flow focus',
    phaseNote:'REBUILD — Training resumes at 60–70% loads, 12–15 reps. No grinding. Feel it, don\'t force it.',
-   kcal:2300,protein:140,carbs:220,fat:80,
+   kcal:2200,protein:140,carbs:195,fat:63,
    exercises:[
      {name:'Goblet Squat',sets:'3×15',unit:'kg'},
      {name:'Leg Press',sets:'3×15',unit:'kg'},
@@ -292,7 +297,7 @@ const DAYS = [
   {n:6,date:'May 1',phase:'recomp',type:'s',label:'Strength',
    title:'Light Upper — Push Focus (60–70%)',sub:'DB press · Laterals · Triceps · No failure',
    phaseNote:'REBUILD — Upper body light session. Shoulder health priority. Keep rest periods generous.',
-   kcal:2300,protein:140,carbs:220,fat:80,
+   kcal:2200,protein:140,carbs:195,fat:63,
    exercises:[
      {name:'DB Bench Press',sets:'3×15',unit:'kg'},
      {name:'Incline DB Press',sets:'3×12',unit:'kg'},
@@ -302,14 +307,14 @@ const DAYS = [
 
   {n:7,date:'May 2',phase:'recomp',type:'r',label:'Rest',
    title:'Rest Day',sub:'Walk only · Lowest calories of the plan',
-   phaseNote:'REBUILD — Rest day. Mild deficit today (~200 kcal below maintenance). High water, clean eating.',
-   kcal:2100,protein:140,carbs:170,fat:72,
+   phaseNote:'REBUILD — Rest day. ~400 kcal below maintenance. High water, clean eating, no extras.',
+   kcal:2000,protein:140,carbs:135,fat:60,
    exercises:[{name:'Walk',sets:'1×30 min',unit:'min'}]},
 
   {n:8,date:'May 3',phase:'recomp',type:'s',label:'Strength',
    title:'Upper — Pull (normal loads return)',sub:'Pull-ups · Rows · Rear delts · Full intensity',
    phaseNote:'REBUILD — Loads return to normal. Volume -1 set vs your baseline. Intensity is back.',
-   kcal:2300,protein:140,carbs:220,fat:80,
+   kcal:2200,protein:140,carbs:195,fat:63,
    exercises:[
      {name:'Pull-Ups / Lat Pulldown',sets:'4×6',unit:'kg'},
      {name:'Barbell Row',sets:'3×8',unit:'kg'},
@@ -321,7 +326,7 @@ const DAYS = [
   {n:9,date:'May 4',phase:'recomp',type:'c',label:'Cardio',
    title:'Tempo Intervals — 4×4 min',sub:'Threshold effort · 90s rest · Aerobic sharpener',
    phaseNote:'REBUILD — First quality run. 4 reps not 5 — conservative return to intensity.',
-   kcal:2300,protein:140,carbs:225,fat:78,
+   kcal:2200,protein:140,carbs:195,fat:63,
    exercises:[
      {name:'Warm-up jog',sets:'1×10 min',unit:'min'},
      {name:'Tempo interval',sets:'4×4 min',unit:'min'},
@@ -332,7 +337,7 @@ const DAYS = [
   {n:10,date:'May 5',phase:'peak',type:'s',label:'Strength',
    title:'Lower — Hinge Focus (full loads)',sub:'Deadlifts · Hip thrusts · Bulgarian · Full volume',
    phaseNote:'PEAK — Full loads, full volume. Carbs up slightly — you should feel noticeably better.',
-   kcal:2350,protein:140,carbs:235,fat:78,
+   kcal:2200,protein:140,carbs:195,fat:63,
    exercises:[
      {name:'Deadlift',sets:'4×4',unit:'kg'},
      {name:'Hip Thrusts',sets:'4×10',unit:'kg'},
@@ -343,7 +348,7 @@ const DAYS = [
   {n:11,date:'May 6',phase:'peak',type:'h',label:'HYROX',
    title:'HYROX Stations — 2 Rounds, Controlled',sub:'Ski · Sled · Wall balls · Lunges · Feel sharp',
    phaseNote:'PEAK — HYROX stations return. Controlled pace — feel athletic and capable, not destroyed.',
-   kcal:2350,protein:140,carbs:235,fat:78,
+   kcal:2200,protein:140,carbs:195,fat:63,
    exercises:[
      {name:'Ski Erg',sets:'2×250 m',unit:'s'},
      {name:'Sled Push',sets:'2×25 m',unit:'kg'},
@@ -354,7 +359,7 @@ const DAYS = [
   {n:12,date:'May 7',phase:'peak',type:'mixed',label:'Peak',
    title:'Peak Session — Strength + Stations',sub:'Short sharp lift + 2 stations · End feeling elite',
    phaseNote:'PEAK — Final day. Leave the gym feeling strong, lean, and ready for what comes next.',
-   kcal:2350,protein:140,carbs:235,fat:78,
+   kcal:2200,protein:140,carbs:195,fat:63,
    exercises:[
      {name:'Back Squat',sets:'3×5',unit:'kg'},
      {name:'Bench Press',sets:'3×5',unit:'kg'},
@@ -667,6 +672,11 @@ window.addEventListener('resize',()=>{if(document.getElementById('panel-weight')
 buildSchedule();
 updateStats();
 setTimeout(()=>{const exp=document.getElementById(`expand-${getTodayN()}`);if(exp)exp.classList.add('open')},200);
+
+// ── SERVICE WORKER REGISTRATION ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
 </script>
 </body>
 </html>

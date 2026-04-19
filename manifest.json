@@ -1,0 +1,17 @@
+{
+  "name": "12-Day Reset Tracker",
+  "short_name": "Reset",
+  "description": "Post-HYROX sim debloat and rebuild tracker",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23080808'/><text x='96' y='130' font-family='sans-serif' font-size='100' font-weight='bold' fill='%23e8ff47' text-anchor='middle'>R</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
