@@ -173,6 +173,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .mono{font-family:'DM Mono',monospace}.txt-muted{color:var(--muted)}
 
+.complete-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.complete-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 16px;border-radius:2px;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;transition:all .2s;border:1px solid var(--border2);
+  background:var(--card);color:var(--muted);
+}
+.complete-btn:hover{border-color:var(--muted2);color:var(--text)}
+.complete-btn.training-btn.done{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.complete-btn.food-btn.done{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
+.complete-icon{font-size:14px}
+@media(max-width:480px){.complete-row{grid-template-columns:1fr}}
+
 @media(max-width:640px){
   .main{padding:16px}
   .stat-strip{grid-template-columns:repeat(2,1fr)}
@@ -219,10 +233,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 </div>
 
 <div class="stat-strip">
-  <div class="stat-box"><div class="stat-val c-accent" id="statDone">0/12</div><div class="stat-lbl">Days Done</div></div>
+  <div class="stat-box"><div class="stat-val c-accent" id="statDone">0/12</div><div class="stat-lbl">Training Done</div></div>
   <div class="stat-box"><div class="stat-val c-green" id="statKg">—</div><div class="stat-lbl">Weight Change</div></div>
   <div class="stat-box"><div class="stat-val c-blue" id="statProtein">0%</div><div class="stat-lbl">Protein Hit Rate</div></div>
-  <div class="stat-box"><div class="stat-val c-orange" id="statSessions">0</div><div class="stat-lbl">Sessions Done</div></div>
+  <div class="stat-box"><div class="stat-val c-orange" id="statSessions">0/12</div><div class="stat-lbl">Nutrition Done</div></div>
 </div>
 
 <div class="tabs">
@@ -403,20 +417,21 @@ function proteinHitRate(){
   DAYS.forEach(d=>{const dd=S.days[d.n];if(dd&&dd.protein!==undefined&&dd.protein!==''){logged++;if(parseFloat(dd.protein)>=140)hit++}});
   return logged===0?0:Math.round(hit/logged*100);
 }
-function sessionsDone(){return DAYS.filter(d=>S.days[d.n]&&S.days[d.n].completed&&d.type!=='r'&&d.type!=='deload').length}
+function sessionsDone(){return DAYS.filter(d=>S.days[d.n]&&S.days[d.n].trainingDone).length}
+function foodDoneCount(){return DAYS.filter(d=>S.days[d.n]&&S.days[d.n].foodDone).length}
 function weightChange(){
   const e=DAYS.map(d=>S.weights[d.n]).filter(v=>v!==undefined&&v!=='');
   if(e.length<2)return null;
   return(parseFloat(e[e.length-1])-parseFloat(e[0])).toFixed(1);
 }
 function updateStats(){
-  const done=DAYS.filter(d=>S.days[d.n]&&S.days[d.n].completed).length;
+  const done=DAYS.filter(d=>S.days[d.n]&&S.days[d.n].trainingDone).length;
   document.getElementById('statDone').textContent=`${done}/12`;
   document.getElementById('progFill').style.width=`${Math.round(done/12*100)}%`;
   document.getElementById('progPct').textContent=`${Math.round(done/12*100)}%`;
   document.getElementById('statProtein').textContent=`${proteinHitRate()}%`;
-  document.getElementById('statSessions').textContent=sessionsDone();
-  document.getElementById('headerDates').textContent=`Apr 26 – May 7 · ${done} of 12 days complete`;
+  document.getElementById('statSessions').textContent=`${foodDoneCount()}/12`;
+  document.getElementById('headerDates').textContent=`Apr 26 – May 7 · ${done} of 12 training days complete`;
   const wc=weightChange();
   const el=document.getElementById('statKg');
   if(wc===null){el.textContent='—'}else{const v=parseFloat(wc);el.textContent=(v<=0?'':'+')+wc+'kg';el.style.color=v<=0?'var(--green)':'var(--red)'}
@@ -434,7 +449,7 @@ function buildSchedule(){
       list.appendChild(div);
     }
     const dd=S.days[d.n]||{};
-    const isCompleted=!!dd.completed;
+    const isCompleted=!!dd.trainingDone;
     const row=document.createElement('div');
     row.className='day-row'+(isCompleted?' completed':'');
     row.id=`day-row-${d.n}`;
@@ -510,6 +525,8 @@ function buildExpand(d,dd){
       <div class="ex-sets-grid">${setCells}</div></div>`;
   }).join('');
 
+  const trainingDone=!!dd.trainingDone;
+  const foodDone=!!dd.foodDone;
   return `
     <div class="phase-note" style="background:${PHASE_BG[d.phase]};color:${PHASE_COLOR[d.phase]};border-color:${PHASE_COLOR[d.phase]}">${d.phaseNote}</div>
     <div class="expand-grid">
@@ -527,6 +544,16 @@ function buildExpand(d,dd){
     <div class="mt12">
       <div class="nut-title mt8">Notes</div>
       <textarea class="notes-area" data-day="${d.n}" placeholder="Energy, sleep quality, how the body felt, any soreness…">${dd.notes||''}</textarea>
+    </div>
+    <div class="complete-row">
+      <button class="complete-btn training-btn ${trainingDone?'done':''}" id="train-btn-${d.n}" data-day="${d.n}">
+        <span class="complete-icon">${trainingDone?'✓':'○'}</span>
+        <span class="complete-label">${trainingDone?'Training Done':'Mark Training Done'}</span>
+      </button>
+      <button class="complete-btn food-btn ${foodDone?'done':''}" id="food-btn-${d.n}" data-day="${d.n}">
+        <span class="complete-icon">${foodDone?'✓':'○'}</span>
+        <span class="complete-label">${foodDone?'Nutrition Done':'Mark Nutrition Done'}</span>
+      </button>
     </div>`;
 }
 
@@ -555,13 +582,55 @@ function wireInputs(d,exp){
   });
   const ta=exp.querySelector('.notes-area');
   if(ta){ta.addEventListener('input',()=>{dayData(parseInt(ta.dataset.day)).notes=ta.value;persist(ind)})}
+
+  // Training done button
+  const trainBtn=exp.querySelector(`#train-btn-${d.n}`);
+  if(trainBtn){
+    trainBtn.addEventListener('click',()=>{
+      const dd=dayData(d.n);
+      dd.trainingDone=!dd.trainingDone;
+      // Day is "complete" when training is done
+      dd.completed=dd.trainingDone;
+      trainBtn.classList.toggle('done',dd.trainingDone);
+      trainBtn.querySelector('.complete-icon').textContent=dd.trainingDone?'✓':'○';
+      trainBtn.querySelector('.complete-label').textContent=dd.trainingDone?'Training Done':'Mark Training Done';
+      // Update the header check button
+      const chk=document.getElementById(`chk-${d.n}`);
+      const row=document.getElementById(`day-row-${d.n}`);
+      if(chk)chk.classList.toggle('done',dd.trainingDone);
+      if(row)row.classList.toggle('completed',dd.trainingDone);
+      persist(ind);
+    });
+  }
+
+  // Food done button
+  const foodBtn=exp.querySelector(`#food-btn-${d.n}`);
+  if(foodBtn){
+    foodBtn.addEventListener('click',()=>{
+      const dd=dayData(d.n);
+      dd.foodDone=!dd.foodDone;
+      foodBtn.classList.toggle('done',dd.foodDone);
+      foodBtn.querySelector('.complete-icon').textContent=dd.foodDone?'✓':'○';
+      foodBtn.querySelector('.complete-label').textContent=dd.foodDone?'Nutrition Done':'Mark Nutrition Done';
+      persist(ind);
+    });
+  }
 }
 
 function toggleExpand(n){document.getElementById(`expand-${n}`).classList.toggle('open')}
 function toggleComplete(n,row){
-  const dd=dayData(n);dd.completed=!dd.completed;
-  row.classList.toggle('completed',dd.completed);
-  document.getElementById(`chk-${n}`).classList.toggle('done',dd.completed);
+  const dd=dayData(n);
+  dd.trainingDone=!dd.trainingDone;
+  dd.completed=dd.trainingDone;
+  row.classList.toggle('completed',dd.trainingDone);
+  document.getElementById(`chk-${n}`).classList.toggle('done',dd.trainingDone);
+  // sync expand button if open
+  const trainBtn=document.getElementById(`train-btn-${n}`);
+  if(trainBtn){
+    trainBtn.classList.toggle('done',dd.trainingDone);
+    trainBtn.querySelector('.complete-icon').textContent=dd.trainingDone?'✓':'○';
+    trainBtn.querySelector('.complete-label').textContent=dd.trainingDone?'Training Done':'Mark Training Done';
+  }
   persist();
 }
 
